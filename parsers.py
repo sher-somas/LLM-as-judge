@@ -1,31 +1,27 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class RelevanceAnswer(BaseModel):
 
-    factual_accuracy : int
-    completeness : int
-    clarity : int
-    politeness : int
-    explanation : str
+    factual_accuracy : Optional[int] = 0
+    completeness : Optional[int] = 0
+    clarity : Optional[int] = 0
+    # politeness : int
+    explanation : Optional[str] = None
 
 class AccuracyAnswer(BaseModel):
 
-    relevance : int
-    factual_correctness : int
-    completeness : int
-    clarity : int
-    logical_consistency : int
-    explanation : str
+    relevance : Optional[int] = 0
+    factual_correctness : Optional[int] = 0
+    completeness : Optional[int] = 0
+    clarity : Optional[int] = 0
+    # logical_consistency : Optional[int] = 0
+    explanation : Optional[str] = None
 
 class HallucinationAnswer(BaseModel):
 
-    factual_accuracy : int
-    logical_consistency : int
-    relevance : int
-    clarity : int
-    explanation : str
-
-class TestAnswer(BaseModel):
-
-    name : str
-    age : int
+    factual_accuracy : Optional[int] = 0
+    logical_consistency : Optional[int] = 0
+    relevance : Optional[int] = 0
+    # clarity : Optional[int] = 0
+    explanation : Optional[str] = None
