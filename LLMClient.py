@@ -57,12 +57,12 @@ class LLMClient:
 
         try:
 
-            instructor_client = instructor.from_openai(OpenAI(base_url="http://localhost:11434/v1", api_key="ollama"))
-            response = instructor_client.chat.completions.create(model="llama3.2:1b", messages=messages, response_model=custom_response_model)
-
-            if response is not None: 
-                print(f"response explanation: {response}")
-
+            instructor_client = instructor.from_openai(OpenAI(base_url="http://localhost:11434/v1", api_key="ollama"),mode=instructor.Mode.JSON) #
+            response = instructor_client.chat.completions.create(model=self.model_name,
+                                                                messages=messages, 
+                                                                response_model=custom_response_model,
+                                                                )
+            
             return response
 
         except Exception as e:
@@ -75,4 +75,8 @@ class LLMClient:
 
 if __name__ == "__main__":
 
-    pass
+    llm_client = LLMClient(client_type="ollama", model_name="llama3.2:1b")
+
+    response = llm_client.llm_output(query="Why is the sky blue?")
+
+    print(f"response: {response}")
