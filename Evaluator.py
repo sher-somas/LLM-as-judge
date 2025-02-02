@@ -1,18 +1,12 @@
-import json
-import os
-import random
-
 from dotenv import load_dotenv
-from groq import Groq
-from opik import track
+
 
 from LLMClient import LLMClient
-
+import parsers
 import evaluation_prompts
 import parsers
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY")) 
 
 
 EVALUATION_MODEL = "llama-3.3-70b-versatile"
@@ -20,7 +14,7 @@ EVALUATION_MODEL = "llama-3.3-70b-versatile"
 
 class Evaluator:
 
-    def __init__(self, client_type: str= "groq", model="llama-3.3-70b-versatile") -> None:
+    def __init__(self, client_type: str= "ollama", model="llama-3.2:1b") -> None:
         self.model = model
         self.client_type = client_type
         self.client = LLMClient(client_type=self.client_type, model_name=self.model)
@@ -44,23 +38,20 @@ class Evaluator:
         
         total_score = 0
 
-        # response = self.client.structured_output_query(query=input_str, custom_response_model=parsers.RelevanceAnswer, evaluation_prompt=evaluation_prompts.relevance_prompt)
-        response = self.client.ollama_output_query(query=input_str, custom_response_model=parsers.RelevanceAnswer, evaluation_prompt=evaluation_prompts.relevance_prompt)
+        response = self.client.output_with_tool(query=input_str, custom_response_model=parsers.RelevanceAnswer, evaluation_prompt=evaluation_prompts.relevance_prompt)
+        # response = self.client.output_with_tool(query=input_str, custom_response_model=parsers.RelevanceAnswer, evaluation_prompt=evaluation_prompts.relevance_prompt)
         
         explanation = None
 
         if response is not None:
 
-            factual_accuracy = response.factual_accuracy
-            completeness = response.completeness
-            clarity = response.completeness
+            factual_accuracy = response.factual_accuracy or 0
+            completeness = response.completeness or 0
+            clarity = response.completeness or 0
             # politeness = response.politeness
-            explanation = response.explanation
+            explanation = response.explanation or 0
             
             total_score = (factual_accuracy +  completeness +  clarity) / 100
-
-            # if total_score > 1:
-            #     total_score = (factual_accuracy +  completeness +  clarity) / 100                
 
 
         return total_score, explanation
@@ -72,17 +63,17 @@ class Evaluator:
         explanation = None
 
         # response = self.client.structured_output_query(query=input_str, custom_response_model=parsers.AccuracyAnswer, evaluation_prompt=evaluation_prompts.accuracy_prompt)
-        response = self.client.ollama_output_query(query=input_str, custom_response_model=parsers.AccuracyAnswer, evaluation_prompt=evaluation_prompts.accuracy_prompt)
+        response = self.client.output_with_tool(query=input_str, custom_response_model=parsers.AccuracyAnswer, evaluation_prompt=evaluation_prompts.accuracy_prompt)
 
         # print(f"accuracy response: {response}")
         if response is not None:
 
-            factual_correctness = response.factual_correctness
-            relevance = response.relevance
-            completeness = response.completeness
-            clarity = response.clarity
+            factual_correctness = response.factual_correctness or 0
+            relevance = response.relevance or 0
+            completeness = response.completeness or 0
+            clarity = response.clarity or 0
             # logical_consistency = response.logical_consistency
-            explanation = response.explanation
+            explanation = response.explanation or 0
 
             total_score = (factual_correctness + relevance + completeness + clarity) / 100
 
@@ -96,15 +87,15 @@ class Evaluator:
         explanation = None
 
         # response = self.client.structured_output_query(query=input_str, custom_response_model=parsers.HallucinationAnswer, evaluation_prompt=evaluation_prompts.hallucination_score)
-        response = self.client.ollama_output_query(query=input_str, custom_response_model=parsers.HallucinationAnswer, evaluation_prompt=evaluation_prompts.hallucination_score)
+        response = self.client.output_with_tool(query=input_str, custom_response_model=parsers.HallucinationAnswer, evaluation_prompt=evaluation_prompts.hallucination_score)
 
         if response is not None:
 
-            factual_accuracy = response.factual_accuracy
-            logical_consistency = response.logical_consistency
-            relevance = response.relevance
+            factual_accuracy = response.factual_accuracy or 0
+            logical_consistency = response.logical_consistency or 0 
+            relevance = response.relevance or 0
             # clarity = response.clarity
-            explanation = response.explanation
+            explanation = response.explanation or 0
 
             total_score = (factual_accuracy + logical_consistency + relevance ) / 100
 
@@ -113,7 +104,6 @@ class Evaluator:
 
 if __name__ == "__main__":
 
-    llm_evaluator = Evaluator(client_type="ollama", model="llama3.1:latest")
 
 
     question = "why is the sky blue"
@@ -152,8 +142,10 @@ Now you know why the sky is blue!"""
     question1 = "A man with blonde hair and brown shirt is drinking water from the fountain"
     answer1 = "The alps are magnificent"
 
-    query = f"""question: {question1} answer: {answer1}"""
+
+    query = f"""question: {question} answer: {answer}"""
     
+    llm_evaluator = Evaluator(client_type="ollama", model="llama3.1:8b")
 
     print(query)
 
@@ -162,8 +154,14 @@ Now you know why the sky is blue!"""
     # hallucination_evaluation = llm_evaluator.hallucination_metric(query)
     # print(f"relevancy: {relevance_evaluation}\t accracy: {accuracy_evaluation}\t hallucination: {hallucination_evaluation}")
 
-    llm_evaluator.evaluate_all(query)
+    result = llm_evaluator.evaluate_all(query)
+    print(result)
 
+    for key, value in result.items():
+        print(f"key: {key} value: {value}")
+    # score, explanation = llm_evaluator.relevance_metric(query)
+    # print(f"score: {score}")
+    # print(f"explanation: {explanation}")
 
 
 
