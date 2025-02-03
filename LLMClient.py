@@ -2,11 +2,12 @@ import instructor
 from langchain_ollama import ChatOllama, OllamaLLM
 from litellm import completion
 from openai import OpenAI
+from pydantic import BaseModel
 
 from parsers import RelevanceAnswer
 
 
-class LLMClient:
+class LLMClient: 
     def __init__(self, client_type: str = "ollama", model_name: str = "llama3.2:1b"):
         self.client_type = client_type
         self.model_name = model_name
@@ -15,7 +16,7 @@ class LLMClient:
 
     def llm_output(
         self, query: str, evaluation_prompt: str = "You are a helpful assistant."
-    ):
+    ) -> str:
         response = None
 
         messages = [
@@ -36,9 +37,9 @@ class LLMClient:
     def output_with_tool(
         self,
         query: str,
-        custom_response_model,
+        custom_response_model: BaseModel, 
         evaluation_prompt: str = "You are a helpful assistant.",
-    ):
+    ) -> BaseModel:
         response = None
 
         messages = [
