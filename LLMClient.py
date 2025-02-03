@@ -1,6 +1,3 @@
-# from typing import List
-# import os
-# # from groq import Groq
 from dotenv import load_dotenv
 from litellm import completion
 import instructor
