@@ -6,12 +6,12 @@ from argparse import ArgumentParser
 import litellm
 import pandas as pd
 import tqdm
-from dotenv import load_dotenv
+
 from tqdm import tqdm
 
 from LLMClient import LLMClient
 
-load_dotenv()
+
 
 
 def get_json_data(file_name: str):
@@ -46,6 +46,7 @@ def save_results(results, file_name):
 
 
 if __name__ == "__main__":
+    
     models = ["llama3.2:1b", "deepseek-r1:1.5b"]
 
     for model in tqdm.tqdm(models):
